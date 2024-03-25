@@ -1,12 +1,13 @@
 from googleapiclient.discovery import build
 import pymongo
-import pymysql
 import json
 import psycopg2
 import streamlit as st
 import pandas as pd
 import certifi
 ca=certifi.where()
+import PIL
+from PIL import Image
 
 
 #API key connection
@@ -414,24 +415,15 @@ def show_comments_table():
 
     return df3
 
-#streamlit part
+#Streamlit part
+st.set_page_config(page_title="Youtube Project",page_icon=":clapper")
+st.markdown(""" <style> body {background-color: #1E1E1E;color:white} </style>""",unsafe_allow_html=True)
+#st.sidebar.image("Youtube-Icon.png", use_column_width=True)
+#st.image(Image.open(r"C:\Users\ADMIN\Desktop\Newfolder\Youtube-Icon.jpg"), width=100)
 
-with st.sidebar:
-    st.title(":red[YOUTUBE DATA HAVERSTING AND WAREHOUSING]")
-    st.header(":blue[Skill Take Away]")
-    st.caption("Python Scripting")
-    st.caption("Data Scrapping")
-    st.caption("Data Collection")
-    st.caption("MongoDB")
-    st.caption("MySQL")
-    st.caption("API Integration")
-    st.caption("Data Management using MongoDB and SQL")
-    st.caption("STREAMLIT")
+channel_id = st.sidebar.text_input("**:blue[ID to gain details]**")
 
-
-channel_id=st.text_input("Enter the channel ID")
-
-if st.button("collect and store data"):
+if st.sidebar.button("**:green[STORATION]**"):
     ch_ids=[]
     db=client["Youtube_data"]
     coll1=db["channel_details"]
@@ -445,29 +437,38 @@ if st.button("collect and store data"):
         insert=channel_details(channel_id)
         st.success(insert)
 
-#New code
-        
+# Main page content
+col1,col2=st.columns([1,3])
+with col1:
+    st.image(Image.open(r"C:\Users\ADMIN\Desktop\Newfolder\Youtube-Icon.jpg"), width=200)
+with col2:
+    st.title(":blue[YOUTUBE DATA HARVESTING AND WAREHOUSING #guvi_Capstone]")
+
 all_channels= []
 coll1=db["channel_details"]
 for ch_data in coll1.find({},{"_id":0,"channel_information":1}):
     all_channels.append(ch_data["channel_information"]["Channel_Name"])
         
-unique_channel= st.selectbox("Select the Channel",all_channels)
+unique_channel= st.sidebar.selectbox("**:blue[Channel name]**",all_channels)
 
-if st.button("Migrate to Sql"):
+
+if st.sidebar.button("**:green[Connect || SQL]**"):
+    # code for migrating to SQL goes here
     Table=tables(unique_channel)
     st.success(Table)
 
-show_table=st.radio("SELECT THE TABLE FOR VIEW",("CHANNELS","VIDEOS","COMMENTS"))
+show_table = st.sidebar.selectbox("**:blue[TABLE FOR VIEW]**", ("CHANNELS", "VIDEOS", "COMMENTS"))
 
-if show_table=="CHANNELS":
+if show_table == "CHANNELS":
+    st.write("**:green[CHANNEL TABLE]**")
     show_channels_table()
-
-elif show_table=="VIDEOS":
+elif show_table == "VIDEOS":
+    st.write("**:green[VIDEOS TABLE]**")
     show_videos_table()
-
-elif show_table=="COMMENTS":
+elif show_table == "COMMENTS":
+    st.write("**:green[COMMENTS TABLE]**")
     show_comments_table()
+
 
 #SQL Connection
 
@@ -480,7 +481,7 @@ mydb=psycopg2.connect(host="localhost",
 cursor=mydb.cursor()
 
 
-question=st.selectbox("Select your question",("1. All the videos and the channel name",
+question=st.sidebar.selectbox("**:blue[GIVEN QUERY]**",("1. All the videos and the channel name",
                                               "2. channels with most number of videos",
                                               "3. 10 most viewed videos",
                                               "4. comments in each videos",
@@ -492,6 +493,7 @@ question=st.selectbox("Select your question",("1. All the videos and the channel
                                               "10. videos with highest number of comments"))
 
 if question=="1. All the videos and the channel name":
+    st.write("**:green[QUERY TABLE]**")
     query1='''select title as videos,channel_name as channelname from videos'''
     cursor.execute(query1)
     mydb.commit()
@@ -500,6 +502,8 @@ if question=="1. All the videos and the channel name":
     st.write(df)
 
 elif question=="2. channels with most number of videos":
+    st.write("**:green[QUERY TABLE]**")
+    st.write(":green[QUERY TABLE]")
     query2='''select channel_name as channelname,total_videos as no_videos from channels 
                 order by total_videos desc'''
     cursor.execute(query2)
@@ -509,6 +513,7 @@ elif question=="2. channels with most number of videos":
     st.write(df2)
 
 elif question=="3. 10 most viewed videos":
+    st.write("**:green[QUERY TABLE]**")
     query3='''select views as views,channel_name as channelname,title as videotitle from videos 
                 where views is not null order by views desc limit 10'''
     cursor.execute(query3)
@@ -518,6 +523,7 @@ elif question=="3. 10 most viewed videos":
     st.write(df3)
 
 elif question=="4. comments in each videos":
+    st.write("**:green[QUERY TABLE]**")
     query4='''select comments as no_comments,title as videotitle from videos where comments is not null'''
     cursor.execute(query4)
     mydb.commit()
@@ -526,6 +532,7 @@ elif question=="4. comments in each videos":
     st.write(df4)
 
 elif question=="5. Videos with higest likes":
+    st.write("**:green[QUERY TABLE]**")
     query5='''select title as videotitle,channel_name as channelname,likes as likecount
                 from videos where likes is not null order by likes desc'''
     cursor.execute(query5)
@@ -535,6 +542,7 @@ elif question=="5. Videos with higest likes":
     st.write(df5)
 
 elif question=="6. likes of all videos":
+    st.write("**:green[QUERY TABLE]**")
     query6='''select likes as likecount,title as videotitle from videos'''
     cursor.execute(query6)
     mydb.commit()
@@ -543,6 +551,7 @@ elif question=="6. likes of all videos":
     st.write(df6)
 
 elif question=="7. views of each channel":
+    st.write("**:green[QUERY TABLE]**")
     query7='''select channel_name as channelname ,views as totalviews from channels'''
     cursor.execute(query7)
     mydb.commit()
@@ -551,6 +560,7 @@ elif question=="7. views of each channel":
     st.write(df7)
 
 elif question=="8. videos published in the year of 2022":
+    st.write("**:green[QUERY TABLE]**")
     query8='''select title as video_title,published_date as videorelease,channel_name as channelname from videos
                 where extract(year from published_date)=2022'''
     cursor.execute(query8)
@@ -560,6 +570,7 @@ elif question=="8. videos published in the year of 2022":
     st.write(df8)
 
 elif question=="9. average duration of all videos in each channel":
+    st.write("**:green[QUERY TABLE]**")
     query9='''select channel_name as channelname,AVG(duration) as averageduration from videos group by channel_name'''
     cursor.execute(query9)
     mydb.commit()
@@ -576,6 +587,7 @@ elif question=="9. average duration of all videos in each channel":
     st.write(df1)
 
 elif question=="10. videos with highest number of comments":
+    st.write("**:green[QUERY TABLE]**")
     query10='''select title as videotitle, channel_name as channelname,comments as comments from videos where comments is
                 not null order by comments desc'''
     cursor.execute(query10)
